@@ -1,0 +1,22 @@
+node{
+   stage('SCM Checkout'){
+     git 'https://github.com/admin971/jenkinspipelinepro.git'
+   }
+
+   stage('Compile-Package'){
+   def mvnHome =  tool name: 'maven3', type: 'maven'   
+   sh "${mvnHome}/bin/mvn clean package
+    sh 'mv target/myweb*.war target/newapp.war'
+  }
+
+  stage('Build Docker Imager'){
+   sh 'docker build -t karthickdevops/myweb .'
+   }
+
+   withCredentials([string(credentialsId: 'dockerPass', variable: 'dockerPassword')]) {
+   sh "docker login -u karthickdevops -p ${dockerPassword}"
+   }
+   sh 'docker push karthickdevops/myweb'
+   }
+}
+
